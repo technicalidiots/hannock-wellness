@@ -1,0 +1,69 @@
+plugins {
+	id 'org.springframework.boot' version '2.4.3'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+}
+
+jar.archiveName = "hannock-wellness.jar"
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	runtimeOnly 'org.postgresql:postgresql'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	
+		
+	// Log4j
+	compile group: 'org.apache.logging.log4j', name:'log4j-api',version:'2.8.2'
+	compile group: 'org.apache.logging.log4j', name:'log4j-core', version:'2.8.2'
+	
+	compile files('lib/wellness-coach-common.jar')
+
+}
+
+test {
+	useJUnitPlatform()
+}
+
+
+
+
+jar{
+	enabled = true
+	manifest{
+		attributes('Main-Class':'com.dev.wellness.HannockWellnessApplication',
+					"Implementation-Title":project.name,
+					"Implemenation-Version":version,
+					//"Class-Path": '. '+configuration.compile.collect{'lib/'+it.getName()}.join(' '))
+	)}
+	exclude("application.properties","log4j2.xml")
+}	
+
+
+
+task copyToLib(type : Copy){
+	into "$buildDir/libs/lib"
+	from configurations.runtime
+}
+
+task copyPropsToLib(type:Copy){
+	into "$buildDir/libs"
+	from "$buildDir/resources/main/application.properties"
+	from "$buildDir/resources/main/log4j2.xml"
+}
+
+
+jar {dependsOn copyToLib, copyPropsToLib}
+
+task buildApp(dependsOn: [clean,jar]) doLast{
+	
+}
